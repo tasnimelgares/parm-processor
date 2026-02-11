@@ -2,7 +2,7 @@
 
 ## Contexte académique
 
-Projet réalisé en **SI3 – Semestre 5** à Polytech Nice-Sophia,
+Projet réalisé en **SI3 – Semestre 5** (2025-2026) à Polytech Nice-Sophia,
 dans le cadre du module d’architecture des systèmes.
 
 Il s’agit d’un **travail de groupe réalisé à 4 étudiants**.
