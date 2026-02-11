@@ -1,0 +1,264 @@
+# Unitary testing: test vectors for Shift, add, sub, mov
+
+# Déclaration des signaux :
+
+Instruction[16] Enable[1] Carry[1] Imm32_Enable[1] Rm[3] Rn[3] Rd[3] Imm5[5] Imm32[32] Flags_Update_Mask[4] ALU_Opcode[4]
+
+# tests
+
+# inputs | outputs 
+# Instruction[16] Enable[1] | Carry[1] Imm32_Enable[1] Rm[3] Rn[3] Rd[3] Imm5[5] Imm32[32] Flags_Update_Mask[4] ALU_Opcode[4]
+
+# ============================
+# LSL (immediate) – opcode 00000 imm5 Rn Rd
+# ============================
+
+# Cas nominal : LSL R2, R1, #2 (instruction 0000000010001010)
+# Test du décodage correct de LSL, imm5, Rn, Rd
+0000000010001010 1 0 0 000 001 010 00010 00000000000000000000000000000000 1110 0010
+
+# Cas limite : imm5 = 0 (LSL R2, R1, #0)
+# Vérifie que imm5=0 est correctement extrait (pas de logique spéciale ici)
+0000000000010010 1 0 0 000 010 010 00000 00000000000000000000000000000000 1110 0010
+
+# Cas limite : imm5 maximal (31) – LSL R7, R0, #31
+# Vérifie la largeur complète du champ imm5
+0000011111000111 1 0 0 000 000 111 11111 00000000000000000000000000000000 1110 0010
+
+# Robustesse : registres extrêmes – LSL R0, R7, #1
+# Vérifie que Rn et Rd sont correctement décodés
+0000000001111000 1 0 0 000 111 000 00001 00000000000000000000000000000000 1110 0010
+
+# Enable = 0 : toutes les sorties doivent être forcées à 0
+# Test obligatoire du comportement de désactivation
+0000000010001010 0 0 0 000 000 000 00000 00000000000000000000000000000000 0000 0000
+
+# ============================
+# LSR (immediate) – opcode 00001 imm5 Rn Rd
+# ============================
+
+# Cas nominal : LSR R2, R1, #2
+# Test du décodage correct de LSR, imm5, Rn et Rd
+0000100010001010 1 0 0 000 001 010 00010 00000000000000000000000000000000 1110 0011
+
+# Cas limite : imm5 = 0 (LSR R2, R1, #0)
+# Vérifie que imm5=0 est correctement extrait (pas de traitement spécial ici)
+0000100000010010 1 0 0 000 010 010 00000 00000000000000000000000000000000 1110 0011
+
+# Cas limite : imm5 maximal (31) – LSR R7, R0, #31
+# Vérifie la largeur complète du champ imm5
+0000111111000111 1 0 0 000 000 111 11111 00000000000000000000000000000000 1110 0011
+
+# Robustesse : registres extrêmes – LSR R0, R7, #1
+# Vérifie le décodage correct de Rn et Rd
+0000100001111000 1 0 0 000 111 000 00001 00000000000000000000000000000000 1110 0011
+
+# Enable = 0 : toutes les sorties doivent être forcées à 0
+# Test obligatoire du comportement de désactivation
+0000100010001010 0 0 0 000 000 000 00000 00000000000000000000000000000000 0000 0000
+
+# ============================
+# ASR (immediate) – opcode 00010 imm5 Rn Rd
+# ============================
+
+# Cas nominal : ASR R2, R1, #2
+# Test du décodage correct de ASR, imm5, Rn et Rd
+0001000010001010 1 0 0 000 001 010 00010 00000000000000000000000000000000 1110 0100
+
+# Cas limite : imm5 = 0 (ASR R2, R1, #0)
+# Vérifie que imm5=0 est correctement extrait (aucune logique spéciale ici)
+0001000000010010 1 0 0 000 010 010 00000 00000000000000000000000000000000 1110 0100
+
+# Cas limite : imm5 maximal (31) – ASR R7, R0, #31
+# Vérifie la largeur complète du champ imm5
+0001011111000111 1 0 0 000 000 111 11111 00000000000000000000000000000000 1110 0100
+
+# Robustesse : registres extrêmes – ASR R0, R7, #1
+# Vérifie le décodage correct de Rn et Rd
+0001000001111000 1 0 0 000 111 000 00001 00000000000000000000000000000000 1110 0100
+
+# Enable = 0 : toutes les sorties doivent être forcées à 0
+# Test obligatoire du comportement de désactivation
+0001000010001010 0 0 0 000 000 000 00000 00000000000000000000000000000000 0000 0000
+
+# ============================
+# ADD (register) – opcode 0001100 Rm Rn Rd
+# ============================
+
+# Cas nominal : ADDS R2, R1, R0
+# Test du décodage correct de ADD register, Rm, Rn, Rd
+0001100000100100 1 0 0 000 100 100 00000 00000000000000000000000000000000 1111 0101
+
+# Robustesse : registres extrêmes – ADDS R7, R7, R7
+# Vérifie le décodage correct de Rm, Rn et Rd
+0001100011111111 1 0 0 011 111 111 00000 00000000000000000000000000000000 1111 0101
+
+# Cas limite : registres à zéro – ADDS R0, R0, R0
+# Vérifie que les registres à zéro sont décodés correctement
+0001100000000000 1 0 0 000 000 000 00000 00000000000000000000000000000000 1111 0101
+
+# Enable = 0 : toutes les sorties doivent être forcées à 0
+# Test obligatoire du comportement de désactivation
+0001100000100100 0 0 0 000 000 000 00000 00000000000000000000000000000000 0000 0000
+
+# ============================
+# SUB (register) – opcode 0001101 Rm Rn Rd
+# ============================
+
+# Cas nominal : SUBS R2, R1, R0
+# Test du décodage correct de SUB register, Rm, Rn, Rd
+0001101000100100 1 1 0 000 100 100 00000 00000000000000000000000000000000 1111 0110
+
+# Robustesse : registres extrêmes – SUBS R7, R7, R7
+# Vérifie le décodage correct de Rm, Rn et Rd
+0001101011111111 1 1 0 011 111 111 00000 00000000000000000000000000000000 1111 0110
+
+# Cas limite : registres à zéro – SUBS R0, R0, R0
+# Vérifie que les registres à zéro sont décodés correctement
+0001101000000000 1 1 0 000 000 000 00000 00000000000000000000000000000000 1111 0110
+
+# Enable = 0 : toutes les sorties doivent être forcées à 0
+# Test obligatoire du comportement de désactivation
+0001101000100100 0 0 0 000 000 000 00000 00000000000000000000000000000000 0000 0000
+
+
+# ============================
+# ADD (immediate, 3-bit) – opcode 0001110 Imm3 Rn Rd
+# ============================
+
+# Cas nominal : ADDS R2, R1, #3
+# Test du décodage correct de ADD immediate, extraction de Imm3, Rn et Rd
+0001110011110100 1 0 1 000 110 100 00000 00000000000000000000000000000011 1111 0101
+
+# Cas limite : Imm3 = 0 – ADDS R2, R1, #0
+# Vérifie que l’immédiat 0 est bien traité
+0001110000000100 1 0 1 000 000 100 00000 00000000000000000000000000000000 1111 0101
+
+# Cas limite : Imm3 = 7 – ADDS R7, R0, #7
+# Vérifie que l’immédiat maximal est correctement étendu
+0001110111110111 1 0 1 000 110 111 00000 00000000000000000000000000000111 1111 0101
+
+# Robustesse : registres extrêmes – ADDS R0, R7, #1
+# Vérifie le décodage correct de Rn, Rd et Imm3
+0001110001011000 1 0 1 000 011 000 00000 00000000000000000000000000000001 1111 0101
+
+# Enable = 0 : toutes les sorties doivent être forcées à 0
+# Test obligatoire du comportement de désactivation
+0001110000110100 0 0 0 000 000 000 00000 00000000000000000000000000000000 0000 0000
+
+# ============================
+# SUB (immediate, 3-bit) – opcode 0001111 Imm3 Rn Rd
+# ============================
+
+# Cas nominal : SUBS R2, R1, #3
+# Test du décodage correct de SUB immediate, extraction de Imm3, Rn et Rd
+0001111011110100 1 1 1 000 110 100 00000 00000000000000000000000000000011 1111 0110
+
+# Cas limite : Imm3 = 0 – SUBS R2, R1, #0
+# Vérifie que l’immédiat 0 est bien traité
+0001111000000100 1 1 1 000 000 100 00000 00000000000000000000000000000000 1111 0110
+
+# Cas limite : Imm3 = 7 – SUBS R7, R0, #7
+# Vérifie que l’immédiat maximal est correctement étendu
+0001111111110111 1 1 1 000 110 111 00000 00000000000000000000000000000111 1111 0110
+
+# Robustesse : registres extrêmes – SUBS R0, R7, #1
+# Vérifie le décodage correct de Rn, Rd et Imm3
+0001111001011000 1 1 1 000 011 000 00000 00000000000000000000000000000001 1111 0110
+
+# Enable = 0 : toutes les sorties doivent être forcées à 0
+# Test obligatoire du comportement de désactivation
+0001111011110100 0 0 0 000 000 000 00000 00000000000000000000000000000000 0000 0000
+
+# ============================
+# MOV (immediate, 8-bit) – opcode 00100 Rd imm8, Imm32 inversé (-Imm8)
+# ============================
+
+# Cas nominal : MOVS R2, #0x12
+0010010100010010 1 0 1 000 000 101 00000 11111111111111111111111111101110 1100 1001
+
+# Cas limite : imm8 = 0 – MOVS R0, #0
+0010000000000000 1 0 1 000 000 000 00000 00000000000000000000000000000000 1100 1001
+
+# Cas limite : imm8 = 255 – MOVS R7, #255
+0010011111111111 1 0 1 000 000 111 00000 11111111111111111111111100000001 1100 1001
+
+# Robustesse : registres extrêmes – MOVS R0, #1
+0010000000000001 1 0 1 000 000 000 00000 11111111111111111111111111111111 1100 1001
+
+# Enable = 0 : toutes les sorties doivent être forcées à 0
+0010010100010010 0 0 0 000 000 000 00000 00000000000000000000000000000000 0000 0000
+
+# ============================
+# CMP (immediate, 8-bit) – opcode 00101 Rd imm8
+# ============================
+
+# Cas nominal : CMP R2, #0x12
+# Test du décodage correct de CMP immediate, extraction de Rd et imm8
+#0010101000010010 1 1 1 000 000 010 00000 00000000000000000000000000010010 1111 0110
+
+# Cas limite : imm8 = 0 – CMP R0, #0
+# Vérifie que l’immédiat 0 est bien traité
+#0010100000000000 1 1 1 000 000 000 00000 00000000000000000000000000000000 1111 0110
+
+# Cas limite : imm8 = 255 – CMP R7, #255
+# Vérifie que l’immédiat maximal est correctement étendu
+#0010101111111111 1 1 1 000 000 111 00000 00000000000000000000000011111111 1111 0110
+
+# Robustesse : registres extrêmes – CMP R0, #1
+# Vérifie le décodage correct de Rd et imm8
+#0010100000000001 1 1 1 000 000 000 00000 00000000000000000000000000000001 1111 0110
+
+# Enable = 0 : toutes les sorties doivent être forcées à 0
+# Test obligatoire du comportement de désactivation
+#0010101000010010 0 0 0 000 000 000 00000 00000000000000000000000000000000 0000 0000
+
+# ============================
+# ADD (immediate, 8-bit) – opcode 00110 Rdn imm8
+# ============================
+
+# Cas nominal : ADDS R2, #0x12
+# Test du décodage correct de ADD immediate, extraction de Rdn et imm8
+0011000100010010 1 0 1 000 001 001 00000 00000000000000000000000000010010 1111 0101
+
+# Cas limite : imm8 = 0 – ADDS R0, #0
+# Vérifie que l’immédiat 0 est bien traité et n’affecte pas l’addition
+0011000000000000 1 0 1 000 000 000 00000 00000000000000000000000000000000 1111 0101
+
+# Cas limite : imm8 = 255 – ADDS R7, #255
+# Vérifie que l’immédiat maximal est correctement étendu et que le carry/overflow peut être déclenché
+0011011111111111 1 0 1 000 111 111 00000 00000000000000000000000011111111 1111 0101
+
+# Robustesse : registres extrêmes – ADDS R0, #1
+# Vérifie le décodage correct de Rdn et imm8, imm32 correctement étendu
+0011000000000001 1 0 1 000 000 000 00000 00000000000000000000000000000001 1111 0101
+
+# Enable = 0 : toutes les sorties doivent être forcées à 0
+# Test obligatoire du comportement de désactivation
+0011000100010010 0 0 0 000 000 000 00000 00000000000000000000000000000000 0000 0000
+
+# ============================
+# SUB (immediate, 8-bit) – opcode 00111 Rdn imm8, Imm32 = imm8 étendu
+# ============================
+
+# Cas nominal : SUBS R2, #0x12
+# Test du décodage correct de SUB immediate, extraction de Rdn et imm8, Imm32 = imm8 étendu
+0011100100010010 1 1 1 000 001 001 00000 00000000000000000000000000010010 1111 0110
+
+# Cas limite : imm8 = 0 – SUBS R0, #0
+# Vérifie que l’immédiat 0 est bien traité
+0011100000000000 1 1 1 000 000 000 00000 00000000000000000000000000000000 1111 0110
+
+# Cas limite : imm8 = 255 – SUBS R7, #255
+# Vérifie que l’immédiat maximal est correctement étendu
+0011111111111111 1 1 1 000 111 111 00000 00000000000000000000000011111111 1111 0110
+
+# Robustesse : registres extrêmes – SUBS R0, #1
+# Vérifie le décodage correct de Rdn et imm8, Imm32 correctement étendu
+0011100000000001 1 1 1 000 000 000 00000 00000000000000000000000000000001 1111 0110
+
+# Enable = 0 : toutes les sorties doivent être forcées à 0
+# Test obligatoire du comportement de désactivation
+0011100100010010 0 0 0 000 000 000 00000 00000000000000000000000000000000 0000 0000
+
+
